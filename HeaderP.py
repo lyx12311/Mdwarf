@@ -322,11 +322,14 @@ def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False):
     print('Finished training! Making predictions!')
     # make prediction
     predictp=np.zeros([len(X_test),1]) # predicted period
+    """
     difc=0
     for i in range(len(X_test)):
         predictp[difc]=regr.predict([X_test[i,:]])
         difc=difc+1
     predictp=np.array(predictp)
+    """
+    predictp=regr.predict(X_test)
     print('Finished predicting! Calculating chi^2!')
     
     # calculate chisq
