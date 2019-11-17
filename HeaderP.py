@@ -103,6 +103,15 @@ def calcChi(Prot,Prot_pre,Prot_err):
             validv=validv+1
     avstedv=sum([(Prot[i]-Prot_pre[i])**2./Prot_err[i] for i in range(len(Prot_err))])/(len(Prot_pre)-validv)
     return avstedv
+    
+# calculates median relative error
+def MRE(Prot,Prot_pre,Prot_err):
+    # Prot: rotation periods
+    # Prot_pre: predicted rotation periods
+    # Prot_err: rotation period errors
+    validv=0
+    meree=np.median([abs(Prot[i]-Prot_pre[i])/Prot[i] for i in range(len(Prot_err))])
+    return meree
 
 # for plotting results for importance and predict vs true
 def plot_result(actrualF,importance,prediction,y_test,y_test_err,topn=20):
@@ -164,8 +173,8 @@ def plot_result(actrualF,importance,prediction,y_test,y_test_err,topn=20):
     plt.legend()
     #plt.savefig('RF.png')
     
-    avstedv=calcChi(y_test,prediction,y_test_err)
-    print('average chisq is: ',avstedv)
+    avstedv=MRE(y_test,prediction,y_test_err)
+    print('Median relative error is: ',avstedv)
     return(my_xticks)
 
 
@@ -231,7 +240,7 @@ def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False):
     # testF: training feature names
     # X_train_ind: KID for training stars
     # X_test_ind: KID for testing stars
-    # chisq_out: output only chisq?
+    # chisq_out: output only median relative error?
     print('regr,importance,actrualF,predictp,X_test,y_test,y_test_err,avstedv = my_randF_SL(df,traind,testF,chisq_out=0)\n')
     #print(df)
     if len(X_train_ind)==0:
@@ -335,8 +344,8 @@ def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False):
     # calculate chisq
     #avstedv=calcChi(y_test,predictp,y_test_err)
     
-    avstedv=calcChi(y_test,predictp,y_test_err)
-    print('Average Chisq is:',avstedv)
+    avstedv=MRE(y_test,predictp,y_test_err)
+    print('Median Relative Error is:',avstedv)
     
     if chisq_out:
         print('Finished!')
