@@ -110,6 +110,8 @@ def MRE(Prot,Prot_pre,Prot_err):
     # Prot_pre: predicted rotation periods
     # Prot_err: rotation period errors
     validv=0
+    #print(Prot-Prot_pre)
+    #print(Prot)
     meree=np.median([abs(Prot[i]-Prot_pre[i])/Prot[i] for i in range(len(Prot_err))])
     return meree
 
@@ -234,14 +236,14 @@ def plot_corr(df,my_xticks,logplotarg=[],logarg=[]):
 
 ############################# RF training #########################################
 # use only a couple of features 
-def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False):
+def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False,MREout=False):
     # df: dataframe to train with all the features including Prot and Prot_err
     # traind: fraction of data use to train
     # testF: training feature names
     # X_train_ind: KID for training stars
     # X_test_ind: KID for testing stars
     # chisq_out: output only median relative error?
-    print('regr,importance,actrualF,predictp,X_test,y_test,y_test_err,avstedv = my_randF_SL(df,traind,testF,chisq_out=0)\n')
+    print('regr,importance,actrualF,KID_train,KID_test,predictp,avstedv,avMRE = my_randF_SL(df,traind,testF,chisq_out=0,MREout=False)\n')
     #print(df)
     if len(X_train_ind)==0:
         print('Fraction of data used to train:',traind)
@@ -330,26 +332,26 @@ def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False):
     
     print('Finished training! Making predictions!')
     # make prediction
-    predictp=np.zeros([len(X_test),1]) # predicted period
-    """
-    difc=0
-    for i in range(len(X_test)):
-        predictp[difc]=regr.predict([X_test[i,:]])
-        difc=difc+1
-    predictp=np.array(predictp)
-    """
     predictp=regr.predict(X_test)
     print('Finished predicting! Calculating chi^2!')
-    
-    # calculate chisq
-    #avstedv=calcChi(y_test,predictp,y_test_err)
-    
-    avstedv=MRE(y_test,predictp,y_test_err)
-    print('Median Relative Error is:',avstedv)
+     
+    # calculate chisq and MRE
+    avMRE=MRE(y_test,predictp,y_test_err)
+    avstedv=calcChi(y_test,predictp,y_test_err)
+
+    print('Median Relative Error is:',avMRE)
+    print('Average Chi^2 is:',avstedv)
     
     if chisq_out:
+        if MREout:
+            print('Finished!')
+            return avstedv,avMRE
+        else:
+            print('Finished!')
+            return avstedv
+    elif MREout:
         print('Finished!')
-        return avstedv
+        return avMRE
     else:
         if len(X_train_ind)!=0:
             KID_train=datafT.KID.values
@@ -357,4 +359,4 @@ def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False):
             KID_train=[int(i) for i in KID_train]
             KID_test=[int(i) for i in KID_test]
         print('Finished!')
-        return regr,importance,actrualF,KID_train,KID_test,predictp,avstedv
+        return regr,importance,actrualF,KID_train,KID_test,predictp,avstedv,avMRE
