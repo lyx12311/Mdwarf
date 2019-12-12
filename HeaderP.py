@@ -236,15 +236,16 @@ def plot_corr(df,my_xticks,logplotarg=[],logarg=[]):
 
 ############################# RF training #########################################
 # use only a couple of features 
-def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False,MREout=False):
+def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False,MREout=False,n_estimators=100, criterion='mse', max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, bootstrap=True, oob_score=False, n_jobs=1, random_state=None, verbose=0, warm_start=False):
     # df: dataframe to train with all the features including Prot and Prot_err
     # traind: fraction of data use to train
     # testF: training feature names
     # X_train_ind: KID for training stars
     # X_test_ind: KID for testing stars
     # chisq_out: output only median relative error?
-    print('regr,importance,actrualF,KID_train,KID_test,predictp,avstedv,avMRE = my_randF_SL(df,traind,testF,chisq_out=0,MREout=False)\n')
-    #print(df)
+   
+    print('regr,importance,actrualF,KID_train,KID_test,predictp,avstedv,avMRE = my_randF_SL(df,traind,testF,chisq_out=0,MREout=False,hyperp=[])\n')
+
     if len(X_train_ind)==0:
         print('Fraction of data used to train:',traind)
     else:
@@ -275,6 +276,7 @@ def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False,MRE
     X=df[actrualF]
     X=X.replace([np.inf, -np.inf], np.nan)
     X=X.dropna()
+
     featl=np.shape(X)[0]
     #print(featl)
     print(str(featl_o)+' stars in dataframe!')
@@ -322,7 +324,7 @@ def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False,MRE
 
 
     # run random forest
-    regr = RandomForestRegressor(n_estimators=100)
+    regr = RandomForestRegressor(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, min_impurity_split=min_impurity_split, bootstrap=bootstrap, oob_score=oob_score, n_jobs=n_jobs, random_state=random_state, verbose=verbose, warm_start=warm_start)
     regr.fit(X_train, y_train)  
     
     
@@ -359,4 +361,4 @@ def my_randF_SL(df,traind,testF,X_train_ind=[],X_test_ind=[],chisq_out=False,MRE
             KID_train=[int(i) for i in KID_train]
             KID_test=[int(i) for i in KID_test]
         print('Finished!')
-        return regr,importance,actrualF,KID_train,KID_test,predictp,avstedv,avMRE
+        return regr,importance,actrualF,KID_train,KID_test,predictp,avstedv,avMRE,X_test,y_test,X_train,y_train
